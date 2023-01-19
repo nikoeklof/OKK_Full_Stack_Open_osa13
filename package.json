@@ -23,6 +23,7 @@
     "argparse": "^2.0.1",
     "array-flatten": "^1.1.1",
     "asynckit": "^0.4.0",
+    "axios": "^1.2.2",
     "babel-jest": "^27.5.1",
     "babel-plugin-istanbul": "^6.1.1",
     "babel-plugin-jest-hoist": "^27.5.1",
@@ -34,7 +35,7 @@
     "binary-extensions": "^2.2.0",
     "bl": "^2.2.1",
     "bluebird": "^3.5.1",
-    "body-parser": "^1.19.2",
+    "body-parser": "^1.20.1",
     "boxen": "^5.1.2",
     "brace-expansion": "^1.1.11",
     "braces": "^3.0.2",
@@ -454,13 +455,14 @@
     "yargs-parser": "^20.2.9"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nikoeklof/OKK_Full_Stack_Open_osa13.git"
   },
-  "author": "Niko EKlöf",
+  "author": "Niko Eklöf",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nikoeklof/OKK_Full_Stack_Open_osa13/issues"
