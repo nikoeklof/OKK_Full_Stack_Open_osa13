@@ -1,51 +1,109 @@
 const router = require("express").Router();
 
-const User = require("../models/User");
-const Blog = require("../models/Blog");
+const { User, Blog } = require("../models");
+const { sessionAuthenticator } = require("../utils/middleware");
 
 router.get("/", async (req, res) => {
   const users = await User.findAll({
     include: {
       model: Blog,
+      as: "blogsCreated",
+      attributes: { exclude: ["userId"] },
     },
   });
   res.json(users);
 });
 
 router.post("/", async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.json(user);
-  } catch (error) {
-    return res.status(400).json({ Error: error.message });
-  }
+  const user = await User.create(req.body);
+  res.json(user);
 });
 
 router.get("/:id", async (req, res) => {
+  let searchByRead = null;
+  let where = {};
+
+  if (req.query?.read) {
+    searchByRead = req.query.read;
+  }
+
+  if (searchByRead !== null) {
+    where = {
+      isRead: searchByRead,
+    };
+  }
+
+  const user = await User.findByPk(req.params.id, {
+    include: [
+      {
+        model: Blog,
+        as: "blogsCreated",
+        attributes: {
+          exclude: ["userId"],
+        },
+      },
+      {
+        model: Blog,
+        as: "blogsReading",
+
+        attributes: {
+          exclude: [""],
+        },
+        through: {
+          attributes: ["isRead", "id"],
+          where,
+        },
+      },
+    ],
+  });
+
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404).end();
+  }
+});
+
+router.put("/:username", sessionAuthenticator, async (req, res) => {
+  if (req.user === null || req.session === null) {
+    return res.status(401).end();
+  }
+
+  const newUsername = req.body.username;
+  const user = await User.findOne({ username: req.params.username });
+
+  if (user) {
+    user.username = newUsername;
+    await user.save();
+    return res.status(201).end();
+  }
+
+  res.status(404).end();
+});
+
+router.delete("/:id", async (req, res) => {
   const user = await User.findByPk(req.params.id);
   if (user) {
-    res.json(user);
+    await user.destroy();
+    res.status(204).end();
   } else {
     res.status(404).end();
   }
 });
-router.delete("/:id", async (req, res) => {
-  if (req.params.id) {
-    User.destroy({ where: { id: req.params.id } });
-    res.status(200).end(`Row with id: ${req.params.id} Deleted.`);
-  } else {
-    res.status(400).end("invalid parameters");
-  }
-});
-router.put("/:username", async (req, res) => {
-  const user = await User.findOne({ where: { username: req.params.username } });
+
+router.post("/:id/disable", async (req, res) => {
+  const user = await User.findByPk(req.params.id);
   if (user) {
-    await user.update({ name: req.body.name });
-    user.save();
-    res.json(user);
+    const isDisabled = !user.isDisabled;
+
+    await user.update({
+      isDisabled,
+    });
   } else {
-    res.status(404).end();
+    return res.status(404).end();
   }
+
+  res.status(200).end();
 });
 
 module.exports = router;

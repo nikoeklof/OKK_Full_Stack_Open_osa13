@@ -2,41 +2,36 @@ const { Model, DataTypes } = require("sequelize");
 
 const { sequelize } = require("../utils/db");
 
-class User extends Model {}
+class UserReading extends Model {}
 
-User.init(
+UserReading.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    username: {
-      type: DataTypes.STRING,
-      unique: true,
+    userId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        isEmail: {
-          msg: "Username must be a valid email",
-        },
-      },
+      references: { model: "user", key: "id" },
     },
-    name: {
-      type: DataTypes.STRING,
+    blogId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: { model: "blog", key: "id" },
     },
-    isDisabled: {
+    isRead: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: false,
     },
   },
   {
     sequelize,
     underscored: true,
-    timestamps: true,
-    modelName: "user",
+    timestamps: false,
+    modelName: "userReading",
   }
 );
 
-module.exports = User;
+module.exports = UserReading;
